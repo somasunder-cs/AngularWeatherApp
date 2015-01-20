@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="angular/angular.js"></script>
+    </head>
+    <body>
+        <div ng-app="WeatherApp" ng-controller="weatherController">
+            <form name="myform">
+                <input type="text" name="state" ng-model="data.state" ng-pattern="/[a-zA-Z]/"  require>
+                <input type="text" name="city" ng-model="data.city" ng-pattern="/A-Za-z/">
+                <button type="button" ng-show="!myform.state.$error.pattern" ng-click="getWeather()">submit</button>
+            </form>
+            <hr>
+            <span>Temperature :</span><span>{{data.temp}}</span>
+            
+        </div>
+        <script>
+           angular.module("WeatherApp",[])
+            .controller("weatherController",["$scope","weatherAPI", function($scope,weatherAPI){
+                $scope.data = {};
+         
+                $scope.getWeather = function(){
+                    console.log("getWeather "+$scope.data.state+", "+$scope.data.city);
+                    weatherAPI.getWeather($scope.data.state, $scope.data.city, $scope.callBack);
+                };
+                
+                $scope.callBack = function(data){
+                    console.log("==>"+data.current_observation.temperature_string);
+                    $scope.data.temp = data.current_observation.temperature_string;
+                }
+                
+            }])
+            .service("weatherAPI",["$http", function($http){
+              
+              this.getWeather = function(state,city, callback){
+                  console.log("getweather");
+                  var url="http://api.wunderground.com/api/c89a43e5007329f5/conditions/q/"+state+"/"+city+".json";
+                  //var url="http://api.wunderground.com/api/c89a43e5007329f5/conditions/q/TX/San antonio.json";
+                  console.log("url "+url);
+                   $http.get(url)
+                          .success(function(data){
+                              callback(data);
+                          })
+                           .error(function(reason){
+                               
+                           });
+                    
+              };
+              
+             }
+            ]);
+        </script>
+    </body>
+</html>
